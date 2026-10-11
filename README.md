@@ -47,7 +47,7 @@ python3 -m http.server 8765
 
 - New questions auto-play Mandarin audio when **Auto-speak** is on
 - Click **Speak** to replay anytime
-- Uses your browser’s speech synthesis (`zh-CN` preferred)
+- Uses your browser’s speech synthesis, forced to Mandarin (`zh-CN`); Cantonese / `zh-HK` voices are skipped
 - For best audio, open the game in a browser on your own machine (virtual desktop audio often does not reach your headphones)
 
 ## Controls

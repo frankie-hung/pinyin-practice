@@ -345,18 +345,50 @@
       typeof SpeechSynthesisUtterance !== "undefined";
   }
 
+  function isCantoneseVoice(v) {
+    const lang = (v.lang || "").toLowerCase().replace(/_/g, "-");
+    const name = v.name || "";
+    return (
+      lang === "zh-hk" ||
+      lang.indexOf("yue") === 0 ||
+      /cantonese|yue|粵語|粤语|廣東話|广东话|香港/i.test(name)
+    );
+  }
+
+  function isMandarinVoice(v) {
+    if (isCantoneseVoice(v)) return false;
+    const lang = (v.lang || "").toLowerCase().replace(/_/g, "-");
+    const name = v.name || "";
+    // Prefer Mainland / Simplified Mandarin; also accept Taiwan Mandarin (國語) over Cantonese
+    if (/^zh-cn\b/.test(lang) || /^zh-hans\b/.test(lang) || /^cmn\b/.test(lang)) return true;
+    if (/mandarin|putonghua|普通话|普通話|國語|国语|Chinese\s*\(China\)|Chinese\s*\(Simplified\)|huihui|yaoyao|kangkang|xiaoxiao|yunxi|yunyang/i.test(name)) return true;
+    if (/^zh-tw\b/.test(lang) || /Chinese\s*\(Taiwan\)|Chinese\s*\(Traditional\)/i.test(name)) return true;
+    return false;
+  }
+
   function pickZhVoice() {
     if (!speechSupported()) return null;
     const voices = window.speechSynthesis.getVoices() || [];
     if (!voices.length) return null;
-    const zhCN = voices.find(function (v) {
-      return /^zh(-|_)?CN/i.test(v.lang) || /Chinese\s*\(China\)/i.test(v.name);
+
+    // Score: zh-CN / Hans first, then other Mandarin, never Cantonese
+    let best = null;
+    let bestScore = -1;
+    voices.forEach(function (v) {
+      if (!isMandarinVoice(v)) return;
+      const lang = (v.lang || "").toLowerCase().replace(/_/g, "-");
+      const name = v.name || "";
+      let score = 10;
+      if (/^zh-cn\b/.test(lang) || /^zh-hans\b/.test(lang)) score += 50;
+      if (/mandarin|putonghua|普通话|普通話|Chinese\s*\(China\)|Chinese\s*\(Simplified\)/i.test(name)) score += 30;
+      if (/google/i.test(name)) score += 5;
+      if (/^zh-tw\b/.test(lang)) score += 5; // 國語 OK, still not Cantonese
+      if (score > bestScore) {
+        bestScore = score;
+        best = v;
+      }
     });
-    if (zhCN) return zhCN;
-    const zh = voices.find(function (v) {
-      return /^zh/i.test(v.lang) || /Chinese|普通话|國語|国语|中文/i.test(v.name);
-    });
-    return zh || null;
+    return best; // null if only Cantonese / no Chinese — caller keeps lang=zh-CN
   }
 
   function cancelSpeech() {
@@ -375,10 +407,18 @@
     u.lang = "zh-CN";
     u.rate = 0.92;
     u.pitch = 1;
+    // Always request Mandarin; never adopt a Cantonese voice.lang (e.g. zh-HK)
     const voice = pickZhVoice();
     if (voice) {
       u.voice = voice;
-      if (voice.lang) u.lang = voice.lang;
+      // Keep utterance lang as zh-CN even if voice reports zh-TW, so engines stay Mandarin
+      if (/^zh(-|_)?cn/i.test(voice.lang) || /^zh(-|_)?hans/i.test(voice.lang)) {
+        u.lang = voice.lang;
+      } else {
+        u.lang = "zh-CN";
+      }
+    } else {
+      u.lang = "zh-CN";
     }
     u.onstart = function () {
       if (els.btnSpeak) els.btnSpeak.classList.add("speaking");
