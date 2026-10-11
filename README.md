@@ -1,6 +1,6 @@
 # Pinyin Practice
 
-An offline Mandarin pinyin mini-game for learners. Practice typing pinyin with tone numbers, or drill with multiple choice. Includes a starter HSK1–HSK2 word bank and browser-based Mandarin pronunciation.
+An offline Mandarin pinyin mini-game for learners. Practice typing pinyin with tone numbers, or drill with multiple choice. Includes a starter HSK1–HSK2 word bank and **bundled Mandarin MP3 pronunciation** (works offline on GitHub Pages and on phone Safari).
 
 Built for Frankie Hung.
 
@@ -10,7 +10,7 @@ Built for Frankie Hung.
 - **Multiple choice** — pick the correct pinyin from four near-miss options
 - **Filters** — all cards, single characters, or multi-character words
 - **Scoring** — correct count, accuracy, and streak
-- **Pronunciation** — auto-speak on each question, plus a replay button (Web Speech API)
+- **Pronunciation** — pre-generated Mandarin MP3s (`zh-CN` neural TTS), auto-speak + replay, **no network TTS required**
 - **Keyboard-friendly** — Enter to submit / next; `1`–`4` for choices
 
 No install, no build step, no CDN. Open `index.html` and play.
@@ -19,6 +19,8 @@ No install, no build step, no CDN. Open `index.html` and play.
 
 1. Clone this repository (or download the files).
 2. Open `index.html` in Chrome, Edge, Firefox, or Safari.
+
+Or play the hosted site: https://frankie-hung.github.io/pinyin-practice/
 
 Optional local server:
 
@@ -45,13 +47,12 @@ python3 -m http.server 8765
 
 ### Pronunciation
 
-Plays **Mandarin** audio over the network (Youdao dictvoice `type=0`, with Google Translate TTS as fallback). This avoids Hong Kong devices reading 汉字 with the system Cantonese voice via Web Speech.
+Each word has a **bundled Mandarin MP3** under `audio/` (generated with Microsoft Edge neural voice `zh-CN-XiaoxiaoNeural`). Playback is local — it does **not** use the device Web Speech API (which often reads 汉字 as Cantonese on Hong Kong phones) and does **not** call Youdao/Google TTS.
 
-- **Auto-speak:** each new question plays Mandarin audio when **自動朗讀** is on (saved in `localStorage`)
+- **Auto-speak:** each new question plays when **自動朗讀** is on (saved in `localStorage`)
 - **Replay:** tap **🔊 發音** anytime
-- Needs a network connection for audio
+- Works offline once the page and audio files are cached / served from Pages
 - On some phones, the first auto-play may be blocked until you tap **發音** once (browser autoplay policy)
-
 
 ## Controls
 
@@ -66,19 +67,20 @@ Plays **Mandarin** audio over the network (Youdao dictvoice `type=0`, with Googl
 
 ## Project structure
 
-| File | Description |
-|------|-------------|
+| File / folder | Description |
+|---------------|-------------|
 | `index.html` | App shell (home + play screens) |
 | `style.css` | Dark theme layout |
 | `words.js` | Word bank (~278 HSK1–HSK2 entries) |
-| `game.js` | Game logic, scoring, speech |
+| `audio-manifest.js` | Map of hanzi → `audio/<hash>.mp3` |
+| `audio/` | Bundled Mandarin MP3 files |
+| `game.js` | Game logic, scoring, local audio playback |
 | `README.md` | This file |
 
 ## Limitations
 
 - Citation forms only (no full tone-sandhi engine)
 - Some characters have multiple readings; the deck uses the common HSK sense
-- Pronunciation quality depends on the OS/browser Chinese voice pack
 - UI labels are Traditional Chinese; deck hanzi are mostly simplified (HSK style)
 
 ## License
