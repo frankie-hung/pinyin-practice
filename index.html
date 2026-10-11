@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="dark" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#fff8f2" />
+  <meta name="description" content="輕鬆練普通話拼音：輸入或四選一，附預錄普通話發音。適合同朋友一齊玩！" />
   <title>拼音練習 · Pinyin Practice</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,15 +14,16 @@
     <!-- HOME -->
     <section id="screen-home" class="screen active">
       <div class="hero">
-        <div class="badge">普通話 · Mandarin</div>
+        <div class="badge">普通話 · Mandarin Fun</div>
         <h1>拼音練習</h1>
+        <p class="tagline">打拼音、聽發音，同朋友一齊練！</p>
         <p class="sub">
-          練聲調、練拼寫。詞庫約 <strong id="word-count">—</strong> 個 HSK1–HSK2 常用字詞。
+          詞庫約 <strong id="word-count">—</strong> 個 HSK1–HSK2 常用字詞 · 預錄普通話發音 · 手機都好易玩
         </p>
       </div>
 
       <div class="home-opts">
-        <label for="filter-select">詞庫篩選 Filter</label>
+        <label for="filter-select">詞庫篩選 · Filter</label>
         <select id="filter-select">
           <option value="all">全部 All</option>
           <option value="char">單字 Characters</option>
@@ -30,11 +33,13 @@
 
       <div class="mode-cards">
         <button type="button" class="mode-card" data-start="type">
+          <div class="mode-emoji" aria-hidden="true">⌨️</div>
           <div class="title">輸入拼音</div>
           <div class="desc">睇漢字，用鍵盤打拼音（聲調數字，例如 <code>ni3 hao3</code>）。都接受聲調符號。</div>
-          <span class="tag">Type · Keyboard</span>
+          <span class="tag">Type · Keyboard · Enter 提交</span>
         </button>
         <button type="button" class="mode-card" data-start="choice">
+          <div class="mode-emoji" aria-hidden="true">🎯</div>
           <div class="title">多選一</div>
           <div class="desc">四個拼音選項，揀正確嗰個。錯選會顯示正確答案同聲調提示。</div>
           <span class="tag">Multiple choice · Tap / 1–4</span>
@@ -44,9 +49,10 @@
       <p class="tips">
         <strong>提示：</strong>聲調用數字 1–4，輕聲用 5（例如 <code>ma1 ma5</code>）。
         ü 可以打 <code>v</code> 或 <code>u:</code>。答完按 Enter 或「下一題」繼續。
-        出題會用<strong>預錄普通話</strong>音檔朗讀（離線可用，唔靠手機粵語系統聲；可用「🔊 發音」重播）。
+        出題會用<strong>預錄普通話</strong>音檔朗讀（離線可用；可用「🔊 發音」重播）。
         若第一次冇聲，撳一次「🔊 發音」解鎖（手機瀏覽器常見限制）。
       </p>
+      <p class="share-note">✨ 連結一發，朋友就可以一齊練拼音</p>
     </section>
 
     <!-- PLAY -->
