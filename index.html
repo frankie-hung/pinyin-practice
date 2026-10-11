@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>拼音練習 · Pinyin Practice</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- HOME -->
+    <section id="screen-home" class="screen active">
+      <div class="hero">
+        <div class="badge">普通話 · Mandarin</div>
+        <h1>拼音練習</h1>
+        <p class="sub">
+          練聲調、練拼寫。詞庫約 <strong id="word-count">—</strong> 個 HSK1–HSK2 常用字詞。
+        </p>
+      </div>
+
+      <div class="home-opts">
+        <label for="filter-select">詞庫篩選 Filter</label>
+        <select id="filter-select">
+          <option value="all">全部 All</option>
+          <option value="char">單字 Characters</option>
+          <option value="word">詞語 Words</option>
+        </select>
+      </div>
+
+      <div class="mode-cards">
+        <button type="button" class="mode-card" data-start="type">
+          <div class="title">輸入拼音</div>
+          <div class="desc">睇漢字，用鍵盤打拼音（聲調數字，例如 <code>ni3 hao3</code>）。都接受聲調符號。</div>
+          <span class="tag">Type · Keyboard</span>
+        </button>
+        <button type="button" class="mode-card" data-start="choice">
+          <div class="title">多選一</div>
+          <div class="desc">四個拼音選項，揀正確嗰個。錯選會顯示正確答案同聲調提示。</div>
+          <span class="tag">Multiple choice · Tap / 1–4</span>
+        </button>
+      </div>
+
+      <p class="tips">
+        <strong>提示：</strong>聲調用數字 1–4，輕聲用 5（例如 <code>ma1 ma5</code>）。
+        ü 可以打 <code>v</code> 或 <code>u:</code>。答完按 Enter 或「下一題」繼續。
+        出題會自動朗讀普通話發音（可用「🔊 發音」重播；可關閉「自動朗讀」）。
+        若喺虛擬桌面觀看，聲音未必傳到你耳機——請喺自己部機開呢個頁先聽到。
+      </p>
+    </section>
+
+    <!-- PLAY -->
+    <section id="screen-play" class="screen">
+      <div class="topbar">
+        <button type="button" class="btn-ghost" id="btn-home">← 主頁</button>
+        <span class="mode-badge" id="mode-badge">—</span>
+        <span class="progress" id="progress">—</span>
+        <span class="spacer"></span>
+        <button type="button" class="btn-ghost" id="btn-restart">重新開始</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="val" id="score-correct">0</div>
+          <div class="lbl">正確</div>
+        </div>
+        <div class="stat">
+          <div class="val" id="score-total">0</div>
+          <div class="lbl">總題</div>
+        </div>
+        <div class="stat">
+          <div class="val" id="score-accuracy">0%</div>
+          <div class="lbl">準確率</div>
+        </div>
+        <div class="stat">
+          <div class="val" id="score-streak">0</div>
+          <div class="lbl">連對</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hanzi" id="hanzi">你好</div>
+        <div class="meaning" id="meaning">hello</div>
+        <div class="speak-row" id="speak-row">
+          <button type="button" class="btn-speak" id="btn-speak" title="重播發音" aria-label="發音">🔊 發音</button>
+          <label class="auto-speak-toggle" id="auto-speak-label" title="出題時自動朗讀">
+            <input type="checkbox" id="auto-speak" checked />
+            <span>自動朗讀</span>
+          </label>
+          <p class="speak-note" id="speak-note" hidden>此瀏覽器唔支援語音合成</p>
+        </div>
+
+        <div id="type-area" class="type-area" hidden>
+          <form id="type-form" class="type-form" autocomplete="off">
+            <div class="type-row">
+              <input
+                id="pinyin-input"
+                type="text"
+                autocomplete="off"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                placeholder="例如 ni3 hao3"
+                aria-label="輸入拼音"
+              />
+              <button type="submit" class="btn-primary" id="submit-btn">提交</button>
+            </div>
+          </form>
+          <div class="type-hint">打完按 Enter 提交 · 聲調 1–4，輕聲 5 · ü 可打 v · 音節空格可選</div>
+        </div>
+
+        <div id="choice-area" class="choice-area" hidden>
+          <div class="choices" id="choices"></div>
+          <div class="choice-hint">鍵盤快捷鍵：1–4 揀選</div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="reveal" id="reveal" hidden></div>
+        <button type="button" class="btn-next" id="next-btn" hidden>下一題 · Next (Enter)</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="words.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
