@@ -338,21 +338,12 @@
   }
 
 
-  // --- Speech: Mandarin TTS audio (not device Web Speech — HK devices often read 汉字 as Cantonese) ---
+  // --- Speech: bundled Mandarin MP3s (offline; avoids HK Web Speech Cantonese) ---
+  const AUDIO_MAP = window.PINYIN_AUDIO || {};
   let ttsAudio = null;
 
   function speechSupported() {
     return typeof Audio !== "undefined";
-  }
-
-  function mandarinTtsUrls(text) {
-    const q = encodeURIComponent(String(text));
-    return [
-      // Youdao dictvoice type=0 = Mandarin
-      "https://dict.youdao.com/dictvoice?audio=" + q + "&type=0",
-      // Google Translate TTS Mandarin fallback
-      "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=zh-CN&q=" + q
-    ];
   }
 
   function setSpeaking(on) {
@@ -360,6 +351,16 @@
       if (on) els.btnSpeak.classList.add("speaking");
       else els.btnSpeak.classList.remove("speaking");
     }
+  }
+
+  function showSpeakNote(msg) {
+    if (!els.speakNote) return;
+    els.speakNote.hidden = false;
+    els.speakNote.textContent = msg;
+  }
+
+  function hideSpeakNote() {
+    if (els.speakNote) els.speakNote.hidden = true;
   }
 
   function cancelSpeech() {
@@ -373,13 +374,10 @@
       } catch (e) { /* ignore */ }
       ttsAudio = null;
     }
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      try { window.speechSynthesis.cancel(); } catch (e2) { /* ignore */ }
-    }
     setSpeaking(false);
   }
 
-  function playAudioUrl(url) {
+  function playLocalAudio(path) {
     return new Promise(function (resolve, reject) {
       const audio = new Audio();
       ttsAudio = audio;
@@ -391,13 +389,12 @@
         if (ttsAudio === audio) ttsAudio = null;
         setSpeaking(false);
         if (ok) resolve();
-        else reject(err || new Error("tts failed"));
+        else reject(err || new Error("audio error"));
       }
       audio.onended = function () { done(true); };
       audio.onerror = function () { done(false, new Error("audio error")); };
       audio.onplaying = function () { setSpeaking(true); };
-      // Some mobile browsers need play() in the same gesture; auto-speak may need a prior tap
-      audio.src = url;
+      audio.src = path;
       const p = audio.play();
       if (p && typeof p.then === "function") {
         p.catch(function (err) { done(false, err); });
@@ -409,24 +406,30 @@
     opts = opts || {};
     if (!text) return;
     cancelSpeech();
-    const urls = mandarinTtsUrls(text);
-    let i = 0;
-    function tryNext() {
-      if (i >= urls.length) {
+
+    function run() {
+      const path = AUDIO_MAP[text];
+      if (!path) {
         setSpeaking(false);
-        if (els.speakNote) {
-          els.speakNote.hidden = false;
-          els.speakNote.textContent = "發音載入失敗（需要網絡）· TTS failed (needs network)";
-        }
+        showSpeakNote("此詞未有預錄普通話音檔 · No bundled Mandarin audio for this word");
         return;
       }
-      const url = urls[i++];
-      playAudioUrl(url).catch(function () {
-        tryNext();
+      playLocalAudio(path).then(function () {
+        hideSpeakNote();
+      }).catch(function (err) {
+        setSpeaking(false);
+        // Autoplay block is common on first load; ask user to tap 發音
+        const name = err && err.name ? err.name : "";
+        if (name === "NotAllowedError") {
+          showSpeakNote("請先撳「🔊 發音」解鎖聲音（瀏覽器限制）· Tap Speak once to unlock audio");
+        } else {
+          showSpeakNote("音檔播放失敗 · Could not play bundled Mandarin audio");
+        }
       });
     }
-    if (opts.immediate) tryNext();
-    else setTimeout(tryNext, 40);
+
+    if (opts.immediate) run();
+    else setTimeout(run, 40);
   }
 
   function scheduleAutoSpeak(word) {
@@ -446,13 +449,10 @@
     if (!els.speakRow) return;
     if (!ok) {
       els.speakRow.classList.add("unsupported");
-      if (els.speakNote) els.speakNote.hidden = false;
+      showSpeakNote("此瀏覽器唔支援音訊播放");
       return;
     }
-    if (els.speakNote) {
-      els.speakNote.hidden = true;
-      els.speakNote.textContent = "普通話發音需要網絡 · Mandarin audio needs network";
-    }
+    hideSpeakNote();
 
     try {
       const saved = localStorage.getItem(AUTO_SPEAK_KEY);
@@ -472,7 +472,7 @@
     if (els.btnSpeak) {
       els.btnSpeak.addEventListener("click", function () {
         if (!state.current) return;
-        if (els.speakNote) els.speakNote.hidden = true;
+        hideSpeakNote();
         speakHanzi(state.current.hanzi, { immediate: true });
       });
     }
